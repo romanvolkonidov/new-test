@@ -22,10 +22,10 @@ primary_region = 'ord'
 
   [[http_service.checks]]
     interval = '15s'
-    timeout = '5s'
-    grace_period = '30s'
+    timeout = '10s'
+    grace_period = '60s'
     method = 'GET'
-    path = '/health'
+    path = '/'
 
 [[services]]
   protocol = 'tcp'

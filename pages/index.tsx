@@ -63,19 +63,19 @@ export default function Home() {
               </h1>
               
               <p className="text-2xl md:text-3xl text-apple-gray-600 mb-4 font-medium">
-                Crystal-clear audio
+                1-on-1 Teaching Platform
               </p>
               
               <p className="text-lg text-apple-gray-500 max-w-2xl mx-auto mb-12">
-                Experience next-generation audio communication with AI-powered noise cancellation and echo suppression.
+                Crystal-clear audio for personalized online lessons. Perfect for tutoring sessions with 1-3 students.
               </p>
 
               {/* Features */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-16">
                 {[
-                  { icon: '🎤', title: 'Clear Audio', desc: '48kHz high-quality' },
-                  { icon: '🔇', title: 'Noise Cancellation', desc: 'AI-powered Deepfilter' },
-                  { icon: '📶', title: 'Always Connected', desc: '99%+ reliability' },
+                  { icon: '👨‍�', title: '1-on-1 Teaching', desc: 'Personal attention' },
+                  { icon: '🔇', title: 'Noise Cancellation', desc: 'Distraction-free' },
+                  { icon: '�', title: 'Works Everywhere', desc: 'Desktop & Mobile' },
                 ].map((feature, i) => (
                   <motion.div
                     key={i}
@@ -99,14 +99,17 @@ export default function Home() {
                 className="max-w-md mx-auto"
               >
                 <div className="apple-card p-8">
-                  <h2 className="text-2xl font-semibold text-apple-gray-900 mb-6">
-                    Join a Room
+                  <h2 className="text-2xl font-semibold text-apple-gray-900 mb-2">
+                    Start a Lesson
                   </h2>
+                  <p className="text-sm text-apple-gray-500 mb-6">
+                    Create or join a teaching session
+                  </p>
                   
                   <form onSubmit={handleJoinRoom} className="space-y-4">
                     <div>
                       <label htmlFor="roomName" className="block text-sm font-medium text-apple-gray-700 mb-2">
-                        Room Name
+                        Lesson Room Name
                       </label>
                       <input
                         type="text"
@@ -114,9 +117,12 @@ export default function Home() {
                         value={roomName}
                         onChange={(e) => setRoomName(e.target.value)}
                         className="w-full px-4 py-3 rounded-xl border border-apple-gray-300 focus:border-apple-blue focus:ring-2 focus:ring-apple-blue/20 outline-none transition-all"
-                        placeholder="my-awesome-room"
+                        placeholder="math-lesson-1"
                         required
                       />
+                      <p className="text-xs text-apple-gray-500 mt-1">
+                        💡 Tip: Use the same name to meet your student
+                      </p>
                     </div>
 
                     <div>
@@ -129,7 +135,7 @@ export default function Home() {
                         value={userName}
                         onChange={(e) => setUserName(e.target.value)}
                         className="w-full px-4 py-3 rounded-xl border border-apple-gray-300 focus:border-apple-blue focus:ring-2 focus:ring-apple-blue/20 outline-none transition-all"
-                        placeholder="John Doe"
+                        placeholder="Teacher Name"
                         required
                       />
                     </div>
@@ -139,17 +145,19 @@ export default function Home() {
                       disabled={isLoading}
                       className="w-full apple-button-primary text-lg"
                     >
-                      {isLoading ? 'Joining...' : 'Join Room'}
+                      {isLoading ? 'Joining...' : '🎓 Start Teaching'}
                     </button>
                   </form>
 
-                  <div className="mt-4 text-center">
-                    <button
-                      onClick={handleQuickJoin}
-                      className="text-apple-blue hover:text-blue-600 font-medium text-sm transition-colors"
-                    >
-                      Quick Join (Random Room)
-                    </button>
+                  <div className="mt-6 p-4 bg-apple-blue/5 rounded-xl">
+                    <p className="text-sm text-apple-gray-700">
+                      <strong>How it works:</strong>
+                    </p>
+                    <ol className="text-xs text-apple-gray-600 mt-2 space-y-1 ml-4 list-decimal">
+                      <li>Enter a room name (e.g., "english-lesson")</li>
+                      <li>Share the room name with your student</li>
+                      <li>Both join the same room to start</li>
+                    </ol>
                   </div>
                 </div>
               </motion.div>
@@ -163,7 +171,7 @@ export default function Home() {
               >
                 <p className="flex items-center justify-center gap-2">
                   <span className="inline-block w-2 h-2 bg-apple-green rounded-full animate-pulse" />
-                  Server online • Deepfilter AI active • TURN enabled
+                  Perfect for 1-on-1 • Supports up to 3 students • AI noise cancellation
                 </p>
               </motion.div>
             </motion.div>
