@@ -1,0 +1,28 @@
+# Ignore LiveKit server files (not needed for frontend deployment)
+fly.toml
+livekit.yaml
+livekit.yaml.backup
+livekit.yaml.template
+Dockerfile
+deploy.sh
+generate-keys.sh
+Building
+
+# Ignore old app directory (files are now in root)
+app/
+
+# Ignore documentation that's not needed in deployment
+DEPLOYMENT_STATUS.md
+QUICKSTART.md
+SUMMARY.md
+VERCEL_FIX.md
+VERCEL_INTEGRATION.md
+VISUAL_GUIDE.txt
+FIX_VERCEL.md
+DEPLOY_NOW.md
+DEPLOY_TO_VERCEL.md
+READY_TO_DEPLOY.md
+START_HERE.md
+
+# Ignore examples
+examples/
