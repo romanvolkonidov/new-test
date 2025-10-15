@@ -1,0 +1,87 @@
+port: 7880
+rtc:
+  port_range_start: 50000
+  port_range_end: 60000
+  # Use TCP fallback for better connectivity
+  use_external_ip: true
+  tcp_port: 7881
+  
+  # UDP port for primary media transport
+  udp_port: 7881
+  
+  # ICE server configuration for NAT traversal
+  ice_servers:
+    - urls:
+        - stun:stun.l.google.com:19302
+        - stun:stun1.l.google.com:19302
+
+# Redis for multi-node clustering (optional, but recommended for production)
+# redis:
+#   address: your-redis-url:6379
+
+# Room configuration for optimal audio quality
+room:
+  # Enable automatic participant cleanup
+  auto_create: true
+  empty_timeout: 300
+  max_participants: 50
+  
+  # Audio presets optimized for voice with noise suppression
+  audio_preset:
+    # Use music preset for highest quality, or speech for lower bandwidth
+    quality: high
+    
+keys:
+  # Generate these with: ./generate-keys.sh
+  # IMPORTANT: Replace these with your own secure keys!
+  API_KEY: YOUR_API_KEY_HERE
+  API_SECRET: YOUR_API_SECRET_HERE
+
+# Webhook for server events (optional)
+# webhook:
+#   urls:
+#     - https://your-app.com/webhook
+#   api_key: your-webhook-key
+
+# Logging configuration
+logging:
+  level: info
+  # Set to debug for troubleshooting
+  # level: debug
+
+# Agent dispatcher - THIS IS KEY FOR YOUR DEEPFILTER INTEGRATION
+agents:
+  # Configure your noise agent
+  - name: deepfilter-noise-agent
+    url: https://rv2class-audio-agent.fly.dev/
+    # Auto-assign to rooms
+    namespace: "default"
+    # API key for agent authentication (if needed)
+    # api_key: your-agent-api-key
+
+# Turn server configuration - ENABLED for better connectivity and echo cancellation
+turn:
+  enabled: true
+  # TURN will use the same domain as your LiveKit server
+  # domain: your-app.fly.dev  # Will be set automatically by Fly.io
+  tls_port: 5349
+  udp_port: 3478
+  # Use TLS for secure TURN connections
+  external_tls: true
+
+# Node configuration
+# node:
+#   ip: your-public-ip
+#   # Optional: specify multiple IPs for multi-homed servers
+#   # ips:
+#   #   - ip1
+#   #   - ip2
+
+# Limit resources to prevent overload
+limit:
+  # Maximum bitrate per participant (in bps)
+  bytes_per_sec: 5000000  # 5 Mbps
+  
+# Enable simulcast for adaptive quality
+simulcast:
+  enabled: true

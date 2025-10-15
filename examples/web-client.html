@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LiveKit Audio Room with Deepfilter</title>
+    <script src="https://unpkg.com/livekit-client/dist/livekit-client.umd.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        button {
+            background: #0066cc;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background: #0052a3;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        button.disconnect {
+            background: #dc3545;
+        }
+        button.disconnect:hover {
+            background: #c82333;
+        }
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            background: #e9ecef;
+        }
+        .status.connected {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .status.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .participants {
+            margin-top: 20px;
+        }
+        .participant {
+            padding: 10px;
+            margin: 5px 0;
+            background: #f8f9fa;
+            border-radius: 5px;
+            border-left: 3px solid #0066cc;
+        }
+        .audio-controls {
+            margin-top: 20px;
+        }
+        .audio-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #ccc;
+            margin-left: 10px;
+        }
+        .audio-indicator.active {
+            background: #28a745;
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .info-box {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .info-box strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎤 LiveKit Audio Room</h1>
+        <p class="subtitle">High-quality audio with Deepfilter noise cancellation</p>
+
+        <div class="info-box">
+            <strong>🎯 Features Enabled:</strong>
+            ✅ Echo Cancellation | ✅ Noise Suppression | ✅ Auto Gain Control | ✅ Deepfilter Agent
+        </div>
+
+        <div class="form-group">
+            <label>Server URL</label>
+            <input type="text" id="serverUrl" value="wss://your-app-name.fly.dev" placeholder="wss://your-app-name.fly.dev">
+        </div>
+
+        <div class="form-group">
+            <label>Access Token</label>
+            <input type="text" id="token" placeholder="Your LiveKit access token">
+            <small style="color: #666;">Generate tokens from your backend using LiveKit SDK</small>
+        </div>
+
+        <div class="form-group">
+            <label>Your Name</label>
+            <input type="text" id="username" value="User" placeholder="Enter your name">
+        </div>
+
+        <div class="form-group">
+            <label>Audio Quality</label>
+            <select id="audioQuality">
+                <option value="music">Music (Highest Quality)</option>
+                <option value="speech">Speech (Lower Bandwidth)</option>
+            </select>
+        </div>
+
+        <div>
+            <button id="connectBtn" onclick="connect()">Connect to Room</button>
+            <button id="disconnectBtn" onclick="disconnect()" disabled class="disconnect">Disconnect</button>
+        </div>
+
+        <div id="status" class="status" style="display: none;"></div>
+
+        <div class="audio-controls" id="audioControls" style="display: none;">
+            <h3>Audio Controls</h3>
+            <button onclick="toggleMute()">
+                <span id="muteText">Mute Microphone</span>
+                <span class="audio-indicator" id="audioIndicator"></span>
+            </button>
+        </div>
+
+        <div class="participants" id="participants" style="display: none;">
+            <h3>Participants (<span id="participantCount">0</span>)</h3>
+            <div id="participantList"></div>
+        </div>
+    </div>
+
+    <script>
+        let room = null;
+        let isMuted = false;
+
+        const AudioPresets = LivekitClient.AudioPresets;
+
+        async function connect() {
+            const serverUrl = document.getElementById('serverUrl').value;
+            const token = document.getElementById('token').value;
+            const username = document.getElementById('username').value;
+            const quality = document.getElementById('audioQuality').value;
+
+            if (!serverUrl || !token) {
+                showStatus('Please enter server URL and token', 'error');
+                return;
+            }
+
+            try {
+                document.getElementById('connectBtn').disabled = true;
+                showStatus('Connecting...', '');
+
+                // Create room with optimized audio settings
+                room = new LivekitClient.Room({
+                    // Audio capture settings for best quality with noise/echo cancellation
+                    audioCaptureDefaults: {
+                        echoCancellation: true,
+                        noiseSuppression: true,
+                        autoGainControl: true,
+                        channelCount: 1,
+                        sampleRate: 48000,
+                    },
+                    // Publishing settings
+                    publishDefaults: {
+                        audioPreset: quality === 'music' ? AudioPresets.music : AudioPresets.speech,
+                        dtx: true, // Discontinuous transmission (saves bandwidth)
+                    },
+                    // Adaptive streaming
+                    adaptiveStream: true,
+                    dynacast: true,
+                });
+
+                // Set up event listeners
+                room.on(LivekitClient.RoomEvent.Connected, () => {
+                    console.log('Connected to room');
+                    showStatus(`Connected as ${username}! Deepfilter agent will process your audio.`, 'connected');
+                    document.getElementById('disconnectBtn').disabled = false;
+                    document.getElementById('audioControls').style.display = 'block';
+                    document.getElementById('participants').style.display = 'block';
+                    updateParticipants();
+                });
+
+                room.on(LivekitClient.RoomEvent.Disconnected, () => {
+                    console.log('Disconnected from room');
+                    showStatus('Disconnected', '');
+                    document.getElementById('connectBtn').disabled = false;
+                    document.getElementById('disconnectBtn').disabled = true;
+                    document.getElementById('audioControls').style.display = 'none';
+                    document.getElementById('participants').style.display = 'none';
+                });
+
+                room.on(LivekitClient.RoomEvent.ParticipantConnected, (participant) => {
+                    console.log('Participant connected:', participant.identity);
+                    updateParticipants();
+                });
+
+                room.on(LivekitClient.RoomEvent.ParticipantDisconnected, (participant) => {
+                    console.log('Participant disconnected:', participant.identity);
+                    updateParticipants();
+                });
+
+                room.on(LivekitClient.RoomEvent.TrackSubscribed, (track, publication, participant) => {
+                    if (track.kind === 'audio') {
+                        // Attach audio track to play through speakers
+                        const audioElement = track.attach();
+                        document.body.appendChild(audioElement);
+                    }
+                });
+
+                room.on(LivekitClient.RoomEvent.AudioPlaybackStatusChanged, () => {
+                    if (!room.canPlaybackAudio) {
+                        showStatus('Click anywhere to enable audio playback', 'error');
+                        document.body.onclick = () => {
+                            room.startAudio();
+                            document.body.onclick = null;
+                        };
+                    }
+                });
+
+                // Monitor local audio level
+                room.on(LivekitClient.RoomEvent.LocalTrackPublished, (publication) => {
+                    if (publication.kind === 'audio') {
+                        monitorAudioLevel(publication.audioTrack);
+                    }
+                });
+
+                // Connect to the room
+                await room.connect(serverUrl, token);
+
+                // Enable microphone
+                await room.localParticipant.setMicrophoneEnabled(true);
+
+            } catch (error) {
+                console.error('Connection error:', error);
+                showStatus(`Error: ${error.message}`, 'error');
+                document.getElementById('connectBtn').disabled = false;
+            }
+        }
+
+        function disconnect() {
+            if (room) {
+                room.disconnect();
+                room = null;
+            }
+        }
+
+        async function toggleMute() {
+            if (!room) return;
+
+            isMuted = !isMuted;
+            await room.localParticipant.setMicrophoneEnabled(!isMuted);
+            document.getElementById('muteText').textContent = isMuted ? 'Unmute Microphone' : 'Mute Microphone';
+        }
+
+        function updateParticipants() {
+            if (!room) return;
+
+            const participants = Array.from(room.participants.values());
+            const count = participants.length + 1; // +1 for local participant
+            
+            document.getElementById('participantCount').textContent = count;
+
+            let html = `
+                <div class="participant">
+                    👤 ${room.localParticipant.identity} (You)
+                    ${isMuted ? '🔇' : '🎤'}
+                </div>
+            `;
+
+            participants.forEach(participant => {
+                const isSpeaking = participant.isSpeaking ? '🔊' : '';
+                html += `
+                    <div class="participant">
+                        👤 ${participant.identity}
+                        ${isSpeaking}
+                    </div>
+                `;
+            });
+
+            document.getElementById('participantList').innerHTML = html;
+        }
+
+        function monitorAudioLevel(track) {
+            // Create audio context to monitor levels
+            const audioContext = new AudioContext();
+            const source = audioContext.createMediaStreamSource(new MediaStream([track.mediaStreamTrack]));
+            const analyser = audioContext.createAnalyser();
+            analyser.fftSize = 256;
+            source.connect(analyser);
+
+            const dataArray = new Uint8Array(analyser.frequencyBinCount);
+            const indicator = document.getElementById('audioIndicator');
+
+            function checkLevel() {
+                if (!room || isMuted) {
+                    indicator.classList.remove('active');
+                    return;
+                }
+
+                analyser.getByteFrequencyData(dataArray);
+                const average = dataArray.reduce((a, b) => a + b) / dataArray.length;
+                
+                if (average > 10) {
+                    indicator.classList.add('active');
+                } else {
+                    indicator.classList.remove('active');
+                }
+
+                requestAnimationFrame(checkLevel);
+            }
+
+            checkLevel();
+        }
+
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = 'status ' + type;
+            status.style.display = 'block';
+        }
+
+        // Update participants periodically
+        setInterval(() => {
+            if (room && room.state === 'connected') {
+                updateParticipants();
+            }
+        }, 2000);
+    </script>
+</body>
+</html>

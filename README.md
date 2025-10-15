@@ -266,4 +266,3 @@ For a small-medium app with ~100 concurrent users, expect ~$10-30/month.
 ## 📝 License
 
 This configuration is provided as-is. LiveKit is licensed under Apache 2.0.
-# new-test
