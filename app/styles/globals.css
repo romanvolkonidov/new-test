@@ -1,0 +1,97 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-apple-gray-200;
+  }
+  
+  body {
+    @apply bg-white text-apple-gray-800 antialiased;
+    font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display font-semibold;
+  }
+}
+
+@layer components {
+  .glass-morphism {
+    @apply bg-white/80 backdrop-blur-apple border border-apple-gray-200/50;
+  }
+
+  .apple-button {
+    @apply px-6 py-3 rounded-full font-medium transition-all duration-200;
+    @apply hover:scale-[1.02] active:scale-[0.98];
+  }
+
+  .apple-button-primary {
+    @apply apple-button bg-apple-blue text-white hover:bg-blue-600;
+  }
+
+  .apple-button-secondary {
+    @apply apple-button bg-apple-gray-100 text-apple-gray-800 hover:bg-apple-gray-200;
+  }
+
+  .apple-card {
+    @apply bg-white rounded-3xl shadow-lg border border-apple-gray-200/50;
+    @apply transition-all duration-300 hover:shadow-xl;
+  }
+
+  .audio-wave {
+    @apply w-1 h-8 bg-apple-green rounded-full;
+    animation: audioWave 1s ease-in-out infinite;
+  }
+}
+
+@keyframes audioWave {
+  0%, 100% {
+    height: 0.5rem;
+  }
+  50% {
+    height: 2rem;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d2d2d7;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #b0b0b8;
+}
+
+/* Audio indicator animation */
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.95);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(0.95);
+    opacity: 1;
+  }
+}
+
+.speaking-indicator {
+  animation: pulse-ring 1.5s ease-in-out infinite;
+}
